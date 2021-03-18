@@ -80,53 +80,59 @@ def execute_at_modification(
     :param custom_options_channels_dict_presave:
     :param custom_options_dict_postsave:
     :param custom_options_channels_dict_postsave:
-    :return:
     :return: tuple of (all_passed, error, mod_input) variables
     """
     allow_saving = True
     error = []
 
-    input_python_code_run, file_run = generate_code(mod_input)
+    try:
+        input_python_code_run, file_run = generate_code(mod_input)
 
-    if len(input_python_code_run.splitlines()) > 999:
-        error.append("Too many lines in code. Reduce code to less than 1000 lines.")
+        if len(input_python_code_run.splitlines()) > 999:
+            error.append("Too many lines in code. Reduce code to less than 1000 lines.")
 
-    lines_code = ''
-    for line_num, each_line in enumerate(input_python_code_run.splitlines(), 1):
-        if len(str(line_num)) == 3:
-            line_spacing = ''
-        elif len(str(line_num)) == 2:
-            line_spacing = ' '
-        else:
-            line_spacing = '  '
-        lines_code += '{sp}{ln}: {line}\n'.format(
-            sp=line_spacing,
-            ln=line_num,
-            line=each_line)
+        lines_code = ''
+        for line_num, each_line in enumerate(input_python_code_run.splitlines(), 1):
+            if len(str(line_num)) == 3:
+                line_spacing = ''
+            elif len(str(line_num)) == 2:
+                line_spacing = ' '
+            else:
+                line_spacing = '  '
+            lines_code += '{sp}{ln}: {line}\n'.format(
+                sp=line_spacing,
+                ln=line_num,
+                line=each_line)
 
-    cmd_test = 'export PYTHONPATH=$PYTHONPATH:/var/mycodo-root && ' \
-               'pylint3 -d I,W0621,C0103,C0111,C0301,C0327,C0410,C0413 {path}'.format(
-        path=file_run)
-    cmd_out, _, cmd_status = cmd_output(cmd_test)
+        cmd_test = 'mkdir -p /var/mycodo-root/.pylint.d && ' \
+                   'export PYTHONPATH=$PYTHONPATH:/var/mycodo-root && ' \
+                   'export PYLINTHOME=/var/mycodo-root/.pylint.d && ' \
+                   'pylint3 -d I,W0621,C0103,C0111,C0301,C0327,C0410,C0413 {path}'.format(
+                       path=file_run)
+        cmd_out, cmd_error, cmd_status = cmd_output(cmd_test)
+        # flash('Pylint command: {}'.format(cmd_test), 'success')
+        message = Markup(
+            '<pre>\n\n'
+            'Full Python Code Input code:\n\n{code}\n\n'
+            'Python Code Input code analysis:\n\n{report}'
+            '</pre>'.format(
+                code=lines_code, report=cmd_out.decode("utf-8")))
+    except Exception as err:
+        cmd_status = None
+        message = "Error running pylint: {}".format(err)
+        error.append(message)
 
-    message = Markup(
-        '<pre>\n\n'
-        'Full Python Code Input code:\n\n{code}\n\n'
-        'Python Code Input code analysis:\n\n{report}'
-        '</pre>'.format(
-            code=lines_code, report=cmd_out.decode("utf-8")))
     if cmd_status:
-        flash('Error(s) were found while evaluating your code. Review '
-              'the error(s), below, and fix them before activating your '
-              'Input.', 'error')
-        flash(message, 'error')
-    else:
-        flash(
-            "No errors were found while evaluating your code. However, "
-            "this doesn't mean your code will perform as expected. "
-            "Review your code for issues and test your Input "
-            "before putting it into a production environment.", 'success')
+        flash("pylint returned with status: {}".format(cmd_status), 'error')
+
+    if message:
+        flash("Review your code for issues and test your Input "
+              "before putting it into a production environment.", 'success')
         flash(message, 'success')
+
+    if error:
+        for each_error in error:
+            flash(each_error, 'error')
 
     return (allow_saving,
             mod_input,

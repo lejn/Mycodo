@@ -1,3 +1,28 @@
+## 8.9.3 (Unreleased)
+
+### Bugfixes
+
+ - Fix camera paths not saving ([#955](https://github.com/kizniche/mycodo/issues/955))
+ - Fix returning pylint3 report after saving Python Code
+
+### Miscellaneous
+
+ - Add Units kilowatt-hour and Watt
+
+
+## 8.9.2 (2021-03-16)
+
+This bugfix release changes how sessions are handled and as a result will log all users out following the upgrade.
+
+### Bugfixes
+
+ - Fix Function measurements not appearing in some dropdowns
+ - Fix displaying saved Custom Option values when Inputs/Outputs have Custom Actions ([#952](https://github.com/kizniche/mycodo/issues/952))
+ - Fix silent failures when cookies are too large ([#950](https://github.com/kizniche/mycodo/issues/950))
+ - Fix use of select_measurement_channel custom option in controllers ([#953](https://github.com/kizniche/mycodo/issues/953))
+ - Fix error-handling of erroneous measurements/units ([#949](https://github.com/kizniche/mycodo/issues/949))
+
+
 ## 8.9.1 (2021-03-13)
 
 ### Bugfixes

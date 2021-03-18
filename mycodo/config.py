@@ -13,7 +13,7 @@ from flask_babel import lazy_gettext
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from config_translations import TRANSLATIONS
 
-MYCODO_VERSION = '8.9.1'
+MYCODO_VERSION = '8.9.2'
 ALEMBIC_VERSION = '110d2d00e91d'
 
 #  FORCE_UPGRADE_MASTER
@@ -924,6 +924,7 @@ class ProdConfig(object):
     }
 
     REMEMBER_COOKIE_DURATION = timedelta(days=90)
+    SESSION_TYPE = "filesystem"
 
     # Ensure file containing the Flask secret_key exists
     FLASK_SECRET_KEY_PATH = os.path.join(DATABASE_PATH, 'flask_secret_key')
@@ -941,5 +942,6 @@ class TestConfig(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     RATELIMIT_ENABLED = False
     SECRET_KEY = '1234'
+    SESSION_TYPE = "filesystem"
     TESTING = True
     DEBUG = True
